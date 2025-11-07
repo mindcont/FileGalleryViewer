@@ -1,0 +1,25 @@
+version: '3.8'
+
+services:
+  file-gallery-viewer:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: file-gallery-viewer
+    ports:
+      - "5000:5000"
+    volumes:
+      # Mount data directory for persistent storage
+      - ./data:/app/data:ro
+      # Optional: Mount frontend for development
+      # - ./frontend:/app/frontend:ro
+    environment:
+      - DATA_DIR=/app/data
+      - FLASK_ENV=production
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:5000/')"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 5s

@@ -1,0 +1,48 @@
+# Systemd service file for File Gallery Viewer
+# Copy this file to /etc/systemd/system/file-gallery-viewer.service
+# 
+# Installation:
+# 1. sudo cp config/file-gallery-viewer.service /etc/systemd/system/
+# 2. sudo systemctl daemon-reload
+# 3. sudo systemctl enable file-gallery-viewer
+# 4. sudo systemctl start file-gallery-viewer
+
+[Unit]
+Description=File Gallery Viewer - Web Application
+After=network.target
+
+[Service]
+Type=notify
+User=www-data
+Group=www-data
+WorkingDirectory=/opt/file-gallery-viewer
+Environment="PATH=/opt/file-gallery-viewer/venv/bin"
+Environment="FLASK_ENV=production"
+Environment="DATA_DIR=/opt/file-gallery-viewer/data"
+Environment="PORT=5000"
+Environment="GUNICORN_WORKERS=4"
+Environment="GUNICORN_TIMEOUT=120"
+
+# Start command
+ExecStart=/opt/file-gallery-viewer/venv/bin/gunicorn \
+          --bind 0.0.0.0:5000 \
+          --workers 4 \
+          --timeout 120 \
+          --access-logfile /var/log/file-gallery-viewer/access.log \
+          --error-logfile /var/log/file-gallery-viewer/error.log \
+          --log-level info \
+          backend.app:app
+
+# Restart policy
+Restart=always
+RestartSec=10
+
+# Security settings
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+ReadWritePaths=/opt/file-gallery-viewer/data /var/log/file-gallery-viewer
+
+[Install]
+WantedBy=multi-user.target
