@@ -19,13 +19,7 @@ logger = logging.getLogger(__name__)
 app = Flask(__name__)
 
 # Configure CORS to allow frontend access
-CORS(app, resources={
-    r"/api/*": {
-        "origins": "*",
-        "methods": ["GET", "POST", "OPTIONS"],
-        "allow_headers": ["Content-Type"]
-    }
-})
+CORS(app, origins="*")
 
 # Get data directory from environment variable or use default
 DATA_DIR = os.environ.get('DATA_DIR', os.path.join(os.path.dirname(__file__), '..', 'data'))

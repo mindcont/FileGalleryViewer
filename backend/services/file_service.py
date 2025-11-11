@@ -97,14 +97,17 @@ class FileService:
             List of FileInfo objects for PNG files
         """
         png_files = []
-        for file_path in self.directory_path.glob('*.png'):
-            if file_path.is_file():
-                png_files.append(self._get_file_info(file_path, 'png'))
+        seen_files = set()
         
-        # Also check for uppercase extension
-        for file_path in self.directory_path.glob('*.PNG'):
-            if file_path.is_file():
-                png_files.append(self._get_file_info(file_path, 'png'))
+        # Scan for both lowercase and uppercase extensions
+        for pattern in ['*.png', '*.PNG']:
+            for file_path in self.directory_path.glob(pattern):
+                if file_path.is_file():
+                    # Use resolved path to avoid duplicates on case-insensitive filesystems
+                    resolved_path = str(file_path.resolve())
+                    if resolved_path not in seen_files:
+                        seen_files.add(resolved_path)
+                        png_files.append(self._get_file_info(file_path, 'png'))
         
         return png_files
     
@@ -116,14 +119,17 @@ class FileService:
             List of FileInfo objects for CSV files
         """
         csv_files = []
-        for file_path in self.directory_path.glob('*.csv'):
-            if file_path.is_file():
-                csv_files.append(self._get_file_info(file_path, 'csv'))
+        seen_files = set()
         
-        # Also check for uppercase extension
-        for file_path in self.directory_path.glob('*.CSV'):
-            if file_path.is_file():
-                csv_files.append(self._get_file_info(file_path, 'csv'))
+        # Scan for both lowercase and uppercase extensions
+        for pattern in ['*.csv', '*.CSV']:
+            for file_path in self.directory_path.glob(pattern):
+                if file_path.is_file():
+                    # Use resolved path to avoid duplicates on case-insensitive filesystems
+                    resolved_path = str(file_path.resolve())
+                    if resolved_path not in seen_files:
+                        seen_files.add(resolved_path)
+                        csv_files.append(self._get_file_info(file_path, 'csv'))
         
         return csv_files
     

@@ -178,7 +178,7 @@ class UIController {
                          alt="${fileData.png_file.name}"
                          data-index="${index}"
                          data-filename="${fileData.png_file.name}"
-                         onerror="this.parentElement.innerHTML='<div class=\\"image-placeholder\\"><i class=\\"bi bi-image\\" style=\\"font-size: 2rem;\\"></i></div>'">
+                         onerror="this.parentElement.innerHTML='&lt;div class=&quot;image-placeholder&quot;&gt;&lt;i class=&quot;bi bi-image&quot; style=&quot;font-size: 2rem;&quot;&gt;&lt;/i&gt;&lt;/div&gt;'">
                     ${fileData.has_csv ? 
                         '<span class="badge bg-success status-badge"><i class="bi bi-check-circle"></i></span>' :
                         '<span class="badge bg-warning status-badge"><i class="bi bi-exclamation-circle"></i></span>'
