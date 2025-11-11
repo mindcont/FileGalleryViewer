@@ -25,7 +25,7 @@ Environment="GUNICORN_TIMEOUT=120"
 
 # Start command
 ExecStart=/opt/file-gallery-viewer/venv/bin/gunicorn \
-          --bind 0.0.0.0:5000 \
+          --bind 0.0.0.0:9000 \
           --workers 4 \
           --timeout 120 \
           --access-logfile /var/log/file-gallery-viewer/access.log \

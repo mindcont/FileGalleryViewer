@@ -7,7 +7,7 @@ services:
       dockerfile: Dockerfile
     container_name: file-gallery-viewer
     ports:
-      - "5000:5000"
+      - "6000:6000"
     volumes:
       # Mount data directory for persistent storage
       - ./data:/app/data:ro

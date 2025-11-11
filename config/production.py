@@ -14,7 +14,7 @@ class ProductionConfig:
     
     # Server settings
     HOST = '0.0.0.0'
-    PORT = int(os.environ.get('PORT', 5000))
+    PORT = int(os.environ.get('PORT', 9000))
     
     # CORS settings
     CORS_ORIGINS = os.environ.get('CORS_ORIGINS', '*').split(',')
