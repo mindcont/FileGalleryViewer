@@ -48,226 +48,22 @@ def validate_filename(filename: str, data_dir: str) -> Path:
     return file_path
 
 
-def get_files_route(file_service):
-    """
-    GET /api/files - Return list of PNG files with matched CSV files
-    
-    Args:
-        file_service: FileService instance
-        
-    Returns:
-        JSON response with file list
-    """
-    @api_bp.route('/files', methods=['GET'])
-    def get_files():
-        try:
-            logger.info("Scanning files...")
-            matches = file_service.scan_files()
-            
-            files_data = [match.to_dict() for match in matches]
-            
-            response = {
-                'files': files_data,
-                'total_count': len(files_data)
-            }
-            
-            logger.info(f"Found {len(files_data)} PNG files")
-            return jsonify(response), 200
-            
-        except Exception as e:
-            logger.error(f"Error scanning files: {e}")
-            return jsonify({
-                'error': 'Failed to scan files',
-                'message': str(e)
-            }), 500
-    
-    return get_files
 
 
-def get_image_route(data_dir: str):
-    """
-    GET /api/image/<filename> - Serve PNG image file
-    
-    Args:
-        data_dir: Base data directory
-        
-    Returns:
-        Image file or error response
-    """
-    @api_bp.route('/image/<filename>', methods=['GET'])
-    def get_image(filename):
-        try:
-            # Validate filename and prevent directory traversal
-            file_path = validate_filename(filename, data_dir)
-            
-            # Check if file exists
-            if not file_path.exists():
-                logger.warning(f"Image not found: {filename}")
-                abort(404, description=f"Image not found: {filename}")
-            
-            # Check if it's a PNG file
-            if not filename.lower().endswith('.png'):
-                logger.warning(f"Invalid file type requested: {filename}")
-                abort(400, description="Only PNG files are allowed")
-            
-            logger.info(f"Serving image: {filename}")
-            return send_file(file_path, mimetype='image/png')
-            
-        except ValueError as e:
-            logger.warning(f"Invalid filename: {filename} - {e}")
-            abort(403, description=str(e))
-        except Exception as e:
-            logger.error(f"Error serving image {filename}: {e}")
-            abort(500, description="Failed to serve image")
-    
-    return get_image
 
 
-def download_csv_route(data_dir: str):
-    """
-    GET /api/download/<filename> - Download CSV file
-    
-    Args:
-        data_dir: Base data directory
-        
-    Returns:
-        CSV file download or error response
-    """
-    @api_bp.route('/download/<filename>', methods=['GET'])
-    def download_csv(filename):
-        try:
-            # Validate filename and prevent directory traversal
-            file_path = validate_filename(filename, data_dir)
-            
-            # Check if file exists
-            if not file_path.exists():
-                logger.warning(f"CSV not found: {filename}")
-                abort(404, description=f"CSV file not found: {filename}")
-            
-            # Check if it's a CSV file
-            if not filename.lower().endswith('.csv'):
-                logger.warning(f"Invalid file type requested: {filename}")
-                abort(400, description="Only CSV files are allowed")
-            
-            logger.info(f"Serving CSV download: {filename}")
-            return send_file(
-                file_path,
-                mimetype='text/csv',
-                as_attachment=True,
-                download_name=filename
-            )
-            
-        except ValueError as e:
-            logger.warning(f"Invalid filename: {filename} - {e}")
-            abort(403, description=str(e))
-        except Exception as e:
-            logger.error(f"Error serving CSV {filename}: {e}")
-            abort(500, description="Failed to serve CSV file")
-    
-    return download_csv
 
 
-def get_thumbnail_route(file_service, data_dir: str):
-    """
-    GET /api/thumbnail/<filename> - Serve thumbnail image
-    
-    Args:
-        file_service: FileService instance
-        data_dir: Base data directory
-        
-    Returns:
-        Thumbnail image or error response
-    """
-    @api_bp.route('/thumbnail/<filename>', methods=['GET'])
-    def get_thumbnail(filename):
-        try:
-            # Validate filename and prevent directory traversal
-            file_path = validate_filename(filename, data_dir)
-            
-            # Check if file exists
-            if not file_path.exists():
-                logger.warning(f"Image not found for thumbnail: {filename}")
-                abort(404, description=f"Image not found: {filename}")
-            
-            # Check if it's a PNG file
-            if not filename.lower().endswith('.png'):
-                logger.warning(f"Invalid file type for thumbnail: {filename}")
-                abort(400, description="Only PNG files are allowed")
-            
-            # Generate thumbnail
-            thumbnail_bytes = file_service.generate_thumbnail(file_path)
-            
-            if thumbnail_bytes is None:
-                logger.error(f"Failed to generate thumbnail for: {filename}")
-                abort(500, description="Failed to generate thumbnail")
-            
-            logger.info(f"Serving thumbnail: {filename}")
-            
-            # Return thumbnail as JPEG
-            from flask import Response
-            return Response(thumbnail_bytes, mimetype='image/jpeg')
-            
-        except ValueError as e:
-            logger.warning(f"Invalid filename: {filename} - {e}")
-            abort(403, description=str(e))
-        except Exception as e:
-            logger.error(f"Error serving thumbnail {filename}: {e}")
-            abort(500, description="Failed to serve thumbnail")
-    
-    return get_thumbnail
 
 
-def get_cache_stats_route(file_service):
-    """
-    GET /api/cache/stats - Get cache statistics
-    
-    Args:
-        file_service: FileService instance
-        
-    Returns:
-        JSON response with cache statistics
-    """
-    @api_bp.route('/cache/stats', methods=['GET'])
-    def get_cache_stats():
-        try:
-            stats = file_service.get_cache_stats()
-            return jsonify(stats), 200
-        except Exception as e:
-            logger.error(f"Error getting cache stats: {e}")
-            return jsonify({
-                'error': 'Failed to get cache statistics',
-                'message': str(e)
-            }), 500
-    
-    return get_cache_stats
 
 
-def invalidate_cache_route(file_service):
-    """
-    POST /api/cache/invalidate - Manually invalidate cache
-    
-    Args:
-        file_service: FileService instance
-        
-    Returns:
-        JSON response confirming cache invalidation
-    """
-    @api_bp.route('/cache/invalidate', methods=['POST'])
-    def invalidate_cache():
-        try:
-            file_service.invalidate_cache()
-            logger.info("Cache invalidated manually")
-            return jsonify({
-                'message': 'Cache invalidated successfully'
-            }), 200
-        except Exception as e:
-            logger.error(f"Error invalidating cache: {e}")
-            return jsonify({
-                'error': 'Failed to invalidate cache',
-                'message': str(e)
-            }), 500
-    
-    return invalidate_cache
+
+
+
+
+
+
 
 
 def register_routes(app, file_service, data_dir):
@@ -279,14 +75,71 @@ def register_routes(app, file_service, data_dir):
         file_service: FileService instance
         data_dir: Base data directory path
     """
-    # Register route handlers
-    get_files_route(file_service)
-    get_image_route(data_dir)
-    download_csv_route(data_dir)
-    get_thumbnail_route(file_service, data_dir)
-    get_cache_stats_route(file_service)
-    invalidate_cache_route(file_service)
     
-    # Register blueprint
+    @api_bp.route('/files', methods=['GET'])
+    def get_files():
+        try:
+            logger.info("Scanning files...")
+            matches = file_service.scan_files()
+            files_data = [match.to_dict() for match in matches]
+            response = {'files': files_data, 'total_count': len(files_data)}
+            logger.info(f"Found {len(files_data)} PNG files")
+            return jsonify(response), 200
+        except Exception as e:
+            logger.error(f"Error scanning files: {e}")
+            return jsonify({'error': 'Failed to scan files', 'message': str(e)}), 500
+    
+    @api_bp.route('/image/<filename>', methods=['GET'])
+    def get_image(filename):
+        try:
+            file_path = validate_filename(filename, data_dir)
+            if not file_path.exists():
+                abort(404, description=f"Image not found: {filename}")
+            if not filename.lower().endswith('.png'):
+                abort(400, description="Only PNG files are allowed")
+            return send_file(file_path, mimetype='image/png')
+        except ValueError as e:
+            abort(403, description=str(e))
+        except Exception as e:
+            logger.error(f"Error serving image {filename}: {e}")
+            abort(500, description="Failed to serve image")
+    
+    @api_bp.route('/thumbnail/<filename>', methods=['GET'])
+    def get_thumbnail(filename):
+        try:
+            file_path = validate_filename(filename, data_dir)
+            if not file_path.exists():
+                abort(404, description=f"Image not found: {filename}")
+            if not filename.lower().endswith('.png'):
+                abort(400, description="Only PNG files are allowed")
+            
+            # Generate thumbnail
+            thumbnail_bytes = file_service.generate_thumbnail(file_path)
+            if thumbnail_bytes is None:
+                abort(500, description="Failed to generate thumbnail")
+            
+            from flask import Response
+            return Response(thumbnail_bytes, mimetype='image/jpeg')
+        except ValueError as e:
+            abort(403, description=str(e))
+        except Exception as e:
+            logger.error(f"Error serving thumbnail {filename}: {e}")
+            abort(500, description="Failed to serve thumbnail")
+    
+    @api_bp.route('/download/<filename>', methods=['GET'])
+    def download_csv(filename):
+        try:
+            file_path = validate_filename(filename, data_dir)
+            if not file_path.exists():
+                abort(404, description=f"CSV file not found: {filename}")
+            if not filename.lower().endswith('.csv'):
+                abort(400, description="Only CSV files are allowed")
+            return send_file(file_path, mimetype='text/csv', as_attachment=True, download_name=filename)
+        except ValueError as e:
+            abort(403, description=str(e))
+        except Exception as e:
+            logger.error(f"Error serving CSV {filename}: {e}")
+            abort(500, description="Failed to serve CSV file")
+    
     app.register_blueprint(api_bp)
     logger.info("API routes registered")
