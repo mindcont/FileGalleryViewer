@@ -75,20 +75,20 @@ def health_check():
     })
 
 
+# Create data directory if it doesn't exist
+os.makedirs(DATA_DIR, exist_ok=True)
+
+# Initialize FileService
+try:
+    file_service = FileService(DATA_DIR)
+    logger.info(f"FileService initialized with directory: {DATA_DIR}")
+except Exception as e:
+    logger.error(f"Failed to initialize FileService: {e}")
+    exit(1)
+
+# Register API routes
+register_routes(app, file_service, DATA_DIR)
+
 if __name__ == '__main__':
-    # Create data directory if it doesn't exist
-    os.makedirs(DATA_DIR, exist_ok=True)
-    
-    # Initialize FileService
-    try:
-        file_service = FileService(DATA_DIR)
-        logger.info(f"FileService initialized with directory: {DATA_DIR}")
-    except Exception as e:
-        logger.error(f"Failed to initialize FileService: {e}")
-        exit(1)
-    
-    # Register API routes
-    register_routes(app, file_service, DATA_DIR)
-    
     logger.info("Starting File Gallery Viewer Backend...")
     app.run(debug=True, host='0.0.0.0', port=9000)

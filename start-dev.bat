@@ -1,0 +1,13 @@
+@echo off
+echo Starting File Gallery Viewer (Development)...
+
+if not exist "venv\" (
+    echo Setting up environment...
+    python setup.py
+)
+
+echo Activating virtual environment...
+call venv\Scripts\activate.bat
+
+echo Starting backend on port 9000...
+python backend/app.py
