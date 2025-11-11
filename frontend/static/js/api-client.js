@@ -3,7 +3,7 @@
  * Handles communication with the backend API
  */
 class APIClient {
-    constructor(baseUrl = 'http://localhost:5000') {
+    constructor(baseUrl = 'http://localhost:9000') {
         this.baseUrl = baseUrl;
     }
 

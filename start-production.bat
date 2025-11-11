@@ -32,7 +32,7 @@ if exist ".env" (
 REM Set default values
 if not defined FLASK_ENV set FLASK_ENV=production
 if not defined DATA_DIR set DATA_DIR=%cd%\data
-if not defined PORT set PORT=5000
+if not defined PORT set PORT=9000
 if not defined GUNICORN_WORKERS set GUNICORN_WORKERS=4
 if not defined GUNICORN_TIMEOUT set GUNICORN_TIMEOUT=120
 

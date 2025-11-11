@@ -31,9 +31,10 @@ fi
 # Set default values
 export FLASK_ENV=${FLASK_ENV:-production}
 export DATA_DIR=${DATA_DIR:-$(pwd)/data}
-export PORT=${PORT:-5000}
+export PORT=${PORT:-9000}
 export GUNICORN_WORKERS=${GUNICORN_WORKERS:-4}
 export GUNICORN_TIMEOUT=${GUNICORN_TIMEOUT:-120}
+export PYTHONPATH=$(pwd)/backend
 
 # Create data directory if it doesn't exist
 mkdir -p "$DATA_DIR"
@@ -58,4 +59,5 @@ exec gunicorn \
     --access-logfile - \
     --error-logfile - \
     --log-level info \
-    backend.app:app
+    --chdir backend \
+    app:app

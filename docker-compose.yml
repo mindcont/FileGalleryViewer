@@ -7,7 +7,7 @@ services:
       dockerfile: Dockerfile
     container_name: file-gallery-viewer
     ports:
-      - "6000:6000"
+      - "9000:9000"
     volumes:
       # Mount data directory for persistent storage
       - ./data:/app/data:ro
@@ -16,9 +16,10 @@ services:
     environment:
       - DATA_DIR=/app/data
       - FLASK_ENV=production
+      - PORT=9000
     restart: unless-stopped
     healthcheck:
-      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:5000/')"]
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:9000/')"]
       interval: 30s
       timeout: 10s
       retries: 3

@@ -91,4 +91,4 @@ if __name__ == '__main__':
     register_routes(app, file_service, DATA_DIR)
     
     logger.info("Starting File Gallery Viewer Backend...")
-    app.run(debug=True, host='0.0.0.0', port=5000)
+    app.run(debug=True, host='0.0.0.0', port=9000)

@@ -27,16 +27,20 @@ RUN useradd -m -u 1000 appuser && \
 USER appuser
 
 # Expose port
-EXPOSE 5000
+EXPOSE 9000
 
 # Set environment variables
 ENV PYTHONUNBUFFERED=1
 ENV DATA_DIR=/app/data
 ENV FLASK_ENV=production
+ENV PYTHONPATH=/app/backend
 
 # Health check
 HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
-    CMD python -c "import urllib.request; urllib.request.urlopen('http://localhost:5000/')"
+    CMD python -c "import urllib.request; urllib.request.urlopen('http://localhost:9000/')"
+
+# Set working directory to backend
+WORKDIR /app/backend
 
 # Run with gunicorn for production
-CMD ["gunicorn", "--bind", "0.0.0.0:5000", "--workers", "4", "--timeout", "120", "--access-logfile", "-", "--error-logfile", "-", "backend.app:app"]
+CMD ["gunicorn", "--bind", "0.0.0.0:9000", "--workers", "4", "--timeout", "120", "--access-logfile", "-", "--error-logfile", "-", "app:app"]
